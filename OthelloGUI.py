@@ -1,3 +1,4 @@
+import time
 import tkinter as tk
 from GameController import *
 from PIL import Image, ImageTk
@@ -25,7 +26,7 @@ class OthelloGUI:
         self.black_score.grid(row=1, column=0, columnspan=4)
         self.white_score = tk.Label(self.root, textvariable=self.score2, font=("Arial", 16), padx=10)
         self.white_score.grid(row=1, column=4, columnspan=4)
-        valid_moves = self.game_controller.generate_valid_move(self.buttons, "b")
+        valid_moves = self.game_controller.generate_valid_move(self.buttons)
         self.highlight_valid_moves(valid_moves)
 
     def draw_board(self):
@@ -39,7 +40,7 @@ class OthelloGUI:
             self.buttons.append(row_buttons)
 
     def button_click(self, row, col):
-        valid_moves = self.game_controller.generate_valid_move(self.buttons, self.game_controller.turn)
+        valid_moves = self.game_controller.generate_valid_move(self.buttons)
         self.highlight_valid_moves(valid_moves)
         flag = False
         for (i, j) in valid_moves:
@@ -47,17 +48,26 @@ class OthelloGUI:
                 flag = True
         if flag:
             old_turn = self.game_controller.update_board(self.buttons, row, col)
-            if old_turn is None:
-                return
-            if self.player2_name != "Computer":
-                Board.outflank(self.buttons, row, col, old_turn)
-            self.root.update()
-            self.root.update_idletasks()
+            Board.outflank(self.buttons, row, col, old_turn)
             player1_score, player2_score = self.game_controller.count_score(self.buttons)
             self.score1.set(player1_score)
             self.score2.set(player2_score)
-            valid_moves = self.game_controller.generate_valid_move(self.buttons, self.game_controller.turn)
-            if len(valid_moves) == 0:
+            self.root.update()
+            self.root.update_idletasks()
+            check = False
+            if self.player2_name == "Computer":
+                time.sleep(1)
+                check = self.game_controller.computer_turn(self.buttons)
+                if check:
+                    player1_score, player2_score = self.game_controller.count_score(self.buttons)
+                    self.score1.set(player1_score)
+                    self.score2.set(player2_score)
+                    self.root.update()
+                    self.root.update_idletasks()
+
+            print(self.game_controller.turn)
+            valid_moves = self.game_controller.generate_valid_move(self.buttons)
+            if len(valid_moves) == 0 and not check:
                 self.game_controller.end_game()
                 self.root.destroy()
                 import MainMenu

@@ -17,18 +17,7 @@ class GameController:
         if old_turn is None:
             return
         if self.turn == "b":
-            if self.player2_name == "Computer":
-                Board.outflank(buttons, row, col, old_turn)
-                board_copy = Board.generate_2d_array(buttons)
-                print(self.difficulty)
-                _, computer_row, computer_col = AlphaBeta.minimax(board_copy, self.difficulty, float("-inf"), float("inf"), True)
-                if computer_row == -1 and computer_col == -1:
-                    return "w"
-                print(computer_row, computer_col)
-                Board.update_board(buttons, computer_row, computer_col, "w")
-                Board.outflank(buttons, computer_row, computer_col, "w")
-                return "w"
-            else:
+            if self.player2_name != "Computer":
                 self.turn = "w"
         else:
             self.turn = "b"
@@ -61,31 +50,40 @@ class GameController:
                 break
         return False
 
-    def generate_valid_move(self, buttons, turn):
+    def generate_valid_move(self, buttons):
         valid_moves = []
         for i in range(8):
             for j in range(8):
-                if buttons[i][j]["text"] == "" and self.check_adjacent(buttons, i, j, turn):
+                if buttons[i][j]["text"] == "" and self.check_adjacent(buttons, i, j, self.turn):
                     valid_moves.append((i, j))
         if len(valid_moves) == 0 and self.player2_name != "Computer":
-            if turn == "b":
-                turn = "w"
+            if self.turn == "b":
+                self.turn = "w"
             else:
-                turn = "b"
+                self.turn = "b"
             for i in range(8):
                 for j in range(8):
-                    if buttons[i][j]["text"] == "" and self.check_adjacent(buttons, i, j, turn):
+                    if buttons[i][j]["text"] == "" and self.check_adjacent(buttons, i, j, self.turn):
                         valid_moves.append((i, j))
-        elif len(valid_moves) == 0 and self.player2_name == "Computer" and turn == "b":
+        elif len(valid_moves) == 0 and self.player2_name == "Computer" and self.turn == "b":
             board_copy = Board.generate_2d_array(buttons)
             print(self.difficulty)
             _, computer_row, computer_col = AlphaBeta.minimax(board_copy, self.difficulty, float("-inf"), float("inf"), True)
             if computer_row == -1 and computer_col == -1:
-                return []
+                for i in range(8):
+                    for j in range(8):
+                        if buttons[i][j]["text"] == "" and self.check_adjacent(buttons, i, j, self.turn):
+                            valid_moves.append((i, j))
+                return valid_moves
             print(computer_row, computer_col)
             Board.update_board(buttons, computer_row, computer_col, "w")
             Board.outflank(buttons, computer_row, computer_col, "w")
-        self.turn = turn
+            valid_moves.clear()
+            for i in range(8):
+                for j in range(8):
+                    if buttons[i][j]["text"] == "" and self.check_adjacent(buttons, i, j, self.turn):
+                        valid_moves.append((i, j))
+            return valid_moves
         return valid_moves
 
     def end_game(self):
@@ -106,3 +104,13 @@ class GameController:
                 elif buttons[i][j]["text"] == "w":
                     self.player2_score += 1
         return self.player1_score, self.player2_score
+
+    def computer_turn(self, buttons):
+        board_copy = Board.generate_2d_array(buttons)
+        _, computer_row, computer_col = AlphaBeta.minimax(board_copy, self.difficulty, float("-inf"), float("inf"), True)
+        if computer_row == -1 and computer_col == -1:
+            return False
+        print(computer_row, computer_col)
+        Board.update_board(buttons, computer_row, computer_col, "w")
+        Board.outflank(buttons, computer_row, computer_col, "w")
+        return True
