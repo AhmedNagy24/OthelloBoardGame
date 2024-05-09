@@ -1,7 +1,7 @@
-def evaluation(board):
+def evaluation(board, depth):
     black_score = board.count("b")
     white_score = board.count("w")
-    return white_score - black_score
+    return white_score - black_score - depth
 
 
 def game_over(board):
@@ -52,7 +52,7 @@ def generate_children(board, turn):
 
 def minimax(board, depth, alpha, beta, maximizing_player):
     if depth == 0 or game_over(board):
-        return evaluation(board), -1, -1
+        return evaluation(board, depth), -1, -1
 
     if maximizing_player:
         max_eval = float("-inf")
