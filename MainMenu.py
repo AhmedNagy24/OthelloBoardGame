@@ -34,7 +34,7 @@ class MainMenu:
         self.diff_radio1.grid(row=2, column=0, pady=10)
         self.diff_radio2 = tk.Radiobutton(button_frame, text="Medium", font=("Arial", 16), variable=self.diff_value, value=3, state="disabled")
         self.diff_radio2.grid(row=2, column=1, pady=10)
-        self.diff_radio3 = tk.Radiobutton(button_frame, text="Hard", font=("Arial", 16), variable=self.diff_value, value=4, state="disabled")
+        self.diff_radio3 = tk.Radiobutton(button_frame, text="Hard", font=("Arial", 16), variable=self.diff_value, value=5, state="disabled")
         self.diff_radio3.grid(row=2, column=2, pady=10)
         self.start_button = tk.Button(button_frame, text="Start", font=("Arial", 16), command=self.start)
         self.start_button.grid(row=3, column=0)

@@ -1,4 +1,4 @@
-def evaluation(board, depth):
+def utility_function(board, depth):
     black_score = board.count("b")
     white_score = board.count("w")
     return white_score - black_score - depth
@@ -52,13 +52,16 @@ def generate_children(board, turn):
 
 def minimax(board, depth, alpha, beta, maximizing_player):
     if depth == 0 or game_over(board):
-        return evaluation(board, depth), -1, -1
+        return utility_function(board, depth), -1, -1
 
     if maximizing_player:
         max_eval = float("-inf")
         max_row = -1
         max_col = -1
-        for (row, col) in generate_children(board, "w"):
+        children = generate_children(board, "w")
+        if len(children) == 0:
+            return utility_function(board, depth), -1, -1
+        for (row, col) in children:
             new_board = board.copy()
             new_board[row][col] = "w"
             value, _, _ = minimax(new_board, depth - 1, alpha, beta, False)
@@ -75,7 +78,10 @@ def minimax(board, depth, alpha, beta, maximizing_player):
         min_eval = float("inf")
         min_row = -1
         min_col = -1
-        for (row, col) in generate_children(board, "b"):
+        children = generate_children(board, "b")
+        if len(children) == 0:
+            return utility_function(board, depth), -1, -1
+        for (row, col) in children:
             new_board = board.copy()
             new_board[row][col] = "b"
             value, _, _ = minimax(new_board, depth - 1, alpha, beta, True)

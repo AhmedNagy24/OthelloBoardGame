@@ -33,28 +33,52 @@ class OthelloGUI:
         for i in range(8):
             row_buttons = []
             for j in range(8):
-                button = tk.Button(self.root, width=6, height=3, command=lambda row=i, col=j: self.button_click(row, col),
+                button = tk.Button(self.root, width=6, height=3,
+                                   command=lambda row=i, col=j: self.button_click(row, col),
                                    background="green", activebackground="green", borderwidth=3, text="")
-                button.grid(row=i+2, column=j, sticky="nsew")
+                button.grid(row=i + 2, column=j, sticky="nsew")
                 row_buttons.append(button)
             self.buttons.append(row_buttons)
 
     def button_click(self, row, col):
         valid_moves = self.game_controller.generate_valid_move(self.buttons)
         self.highlight_valid_moves(valid_moves)
-        flag = False
-        for (i, j) in valid_moves:
-            if row == i and col == j:
-                flag = True
-        if flag:
-            old_turn = self.game_controller.update_board(self.buttons, row, col)
-            Board.outflank(self.buttons, row, col, old_turn)
-            player1_score, player2_score = self.game_controller.count_score(self.buttons)
-            self.score1.set(player1_score)
-            self.score2.set(player2_score)
-            self.root.update()
-            self.root.update_idletasks()
-            check = False
+        if len(valid_moves) != 0:
+            flag = False
+            for (i, j) in valid_moves:
+                if row == i and col == j:
+                    flag = True
+            if flag:
+                old_turn = self.game_controller.update_board(self.buttons, row, col)
+                Board.outflank(self.buttons, row, col, old_turn)
+                player1_score, player2_score = self.game_controller.count_score(self.buttons)
+                self.score1.set(player1_score)
+                self.score2.set(player2_score)
+                self.root.update()
+                self.root.update_idletasks()
+                check = False
+                if self.player2_name == "Computer":
+                    time.sleep(1)
+                    check = self.game_controller.computer_turn(self.buttons)
+                    if check:
+                        player1_score, player2_score = self.game_controller.count_score(self.buttons)
+                        self.score1.set(player1_score)
+                        self.score2.set(player2_score)
+                        self.root.update()
+                        self.root.update_idletasks()
+
+                print(self.game_controller.turn)
+                valid_moves = self.game_controller.generate_valid_move(self.buttons)
+                if len(valid_moves) == 0 and not check:
+                    self.game_controller.end_game()
+                    self.root.destroy()
+                    import MainMenu
+                    MainMenu.MainMenu().run()
+                    return
+                self.highlight_valid_moves(valid_moves)
+                self.root.update()
+                self.root.update_idletasks()
+        else:
             if self.player2_name == "Computer":
                 time.sleep(1)
                 check = self.game_controller.computer_turn(self.buttons)
@@ -64,18 +88,12 @@ class OthelloGUI:
                     self.score2.set(player2_score)
                     self.root.update()
                     self.root.update_idletasks()
-
-            print(self.game_controller.turn)
-            valid_moves = self.game_controller.generate_valid_move(self.buttons)
-            if len(valid_moves) == 0 and not check:
-                self.game_controller.end_game()
-                self.root.destroy()
-                import MainMenu
-                MainMenu.MainMenu().run()
-                return
-            self.highlight_valid_moves(valid_moves)
-            self.root.update()
-            self.root.update_idletasks()
+                else:
+                    self.game_controller.end_game()
+                    self.root.destroy()
+                    import MainMenu
+                    MainMenu.MainMenu().run()
+                    return
 
     def highlight_valid_moves(self, valid_moves):
         for i in range(8):

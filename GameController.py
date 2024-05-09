@@ -109,6 +109,7 @@ class GameController:
         board_copy = Board.generate_2d_array(buttons)
         _, computer_row, computer_col = AlphaBeta.minimax(board_copy, self.difficulty, float("-inf"), float("inf"), True)
         if computer_row == -1 and computer_col == -1:
+            print("No valid moves")
             return False
         print(computer_row, computer_col)
         Board.update_board(buttons, computer_row, computer_col, "w")
