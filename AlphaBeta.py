@@ -93,6 +93,3 @@ def minimax(board, depth, alpha, beta, maximizing_player):
             if beta <= alpha:
                 break
         return min_eval, min_row, min_col
-#
-# # initial call
-# minimax(current_position, 3, float("-inf"), float("inf"), True)
