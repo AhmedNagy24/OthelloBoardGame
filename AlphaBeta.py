@@ -1,6 +1,12 @@
 def utility_function(board, depth):
-    black_score = board.count("b")
-    white_score = board.count("w")
+    black_score = 0
+    white_score = 0
+    for i in range(8):
+        for j in range(8):
+            if board[i][j] == "w":
+                white_score += 1
+            elif board[i][j] == "b":
+                black_score += 1
     return white_score - black_score - depth
 
 
@@ -50,6 +56,42 @@ def generate_children(board, turn):
     return valid_moves
 
 
+def outflank(board, row, col, turn):
+    output = board.copy()
+    for i in range(row - 1, 0, -1):
+        if output[i][col] == turn and i + 1 != row:
+            for itr_row in range(row, i, -1):
+                output[itr_row][col] = turn
+            break
+        elif output[i][col] == "":
+            break
+
+    for i in range(row + 1, 8):
+        if output[i][col] == turn and i - 1 != row:
+            for itr_row in range(row, i):
+                output[itr_row][col] = turn
+            break
+        elif output[i][col] == "":
+            break
+
+    for i in range(col - 1, 0, -1):
+        if output[row][i] == turn and i + 1 != col:
+            for itr_col in range(col, i, -1):
+                output[row][itr_col] = turn
+            break
+        elif output[row][i] == "":
+            break
+
+    for i in range(col + 1, 8):
+        if output[row][i] == turn and i - 1 != col:
+            for itr_col in range(col, i):
+                output[row][itr_col] = turn
+            break
+        elif output[row][i] == "":
+            break
+    return output
+
+
 def minimax(board, depth, alpha, beta, maximizing_player):
     if depth == 0 or game_over(board):
         return utility_function(board, depth), -1, -1
@@ -64,7 +106,8 @@ def minimax(board, depth, alpha, beta, maximizing_player):
         for (row, col) in children:
             new_board = board.copy()
             new_board[row][col] = "w"
-            value, _, _ = minimax(new_board, depth - 1, alpha, beta, False)
+            next_state = outflank(new_board, row, col, "w")
+            value, _, _ = minimax(next_state, depth - 1, alpha, beta, False)
             if max_eval < value:
                 max_eval = value
                 max_row = row
@@ -84,7 +127,8 @@ def minimax(board, depth, alpha, beta, maximizing_player):
         for (row, col) in children:
             new_board = board.copy()
             new_board[row][col] = "b"
-            value, _, _ = minimax(new_board, depth - 1, alpha, beta, True)
+            next_state = outflank(new_board, row, col, "w")
+            value, _, _ = minimax(next_state, depth - 1, alpha, beta, True)
             if min_eval > value:
                 min_eval = value
                 min_row = row

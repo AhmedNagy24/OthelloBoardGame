@@ -60,12 +60,11 @@ class OthelloGUI:
                 if self.player2_name == "Computer":
                     time.sleep(1)
                     check = self.game_controller.computer_turn(self.buttons)
-                    if check:
-                        player1_score, player2_score = self.game_controller.count_score(self.buttons)
-                        self.score1.set(player1_score)
-                        self.score2.set(player2_score)
-                        self.root.update()
-                        self.root.update_idletasks()
+                    player1_score, player2_score = self.game_controller.count_score(self.buttons)
+                    self.score1.set(player1_score)
+                    self.score2.set(player2_score)
+                    self.root.update()
+                    self.root.update_idletasks()
 
                 print(self.game_controller.turn)
                 valid_moves = self.game_controller.generate_valid_move(self.buttons)
@@ -75,25 +74,49 @@ class OthelloGUI:
                     import MainMenu
                     MainMenu.MainMenu().run()
                     return
+                elif len(valid_moves) == 0 and check:
+                    valid_moves = self.game_controller.generate_valid_move(self.buttons)
+                    while len(valid_moves) == 0 and check:
+                        check = self.game_controller.computer_turn(self.buttons)
+                        player1_score, player2_score = self.game_controller.count_score(self.buttons)
+                        self.score1.set(player1_score)
+                        self.score2.set(player2_score)
+                        self.root.update()
+                        self.root.update_idletasks()
+                        valid_moves = self.game_controller.generate_valid_move(self.buttons)
+                    valid_moves = self.game_controller.generate_valid_move(self.buttons)
+                    if len(valid_moves) == 0 and not check:
+                        self.game_controller.end_game()
+                        self.root.destroy()
+                        import MainMenu
+                        MainMenu.MainMenu().run()
+                        return
                 self.highlight_valid_moves(valid_moves)
                 self.root.update()
                 self.root.update_idletasks()
         else:
             if self.player2_name == "Computer":
                 time.sleep(1)
-                check = self.game_controller.computer_turn(self.buttons)
-                if check:
+                valid_moves = self.game_controller.generate_valid_move(self.buttons)
+                check = True
+                while len(valid_moves) == 0 and check:
+                    check = self.game_controller.computer_turn(self.buttons)
                     player1_score, player2_score = self.game_controller.count_score(self.buttons)
                     self.score1.set(player1_score)
                     self.score2.set(player2_score)
                     self.root.update()
                     self.root.update_idletasks()
-                else:
+                    valid_moves = self.game_controller.generate_valid_move(self.buttons)
+                if len(valid_moves) == 0 and not check:
                     self.game_controller.end_game()
                     self.root.destroy()
                     import MainMenu
                     MainMenu.MainMenu().run()
                     return
+                self.highlight_valid_moves(valid_moves)
+                self.root.update()
+                self.root.update_idletasks()
+
 
     def highlight_valid_moves(self, valid_moves):
         for i in range(8):
