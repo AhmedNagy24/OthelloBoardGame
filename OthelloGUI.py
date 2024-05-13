@@ -1,4 +1,3 @@
-import time
 import tkinter as tk
 from GameController import *
 
@@ -36,25 +35,33 @@ class OthelloGUI:
             self.buttons.append(row_buttons)
 
     def button_click(self, row, col):
+        if not self.check_discs():
+            self.end()
         valid_moves = self.game_controller.generate_valid_move(self.buttons)
         self.highlight_valid_moves(valid_moves)
         flag = valid_moves.count((row, col))
         if flag > 0:
             old_turn = self.game_controller.update_board(self.buttons, row, col)
             Board.outflank(self.buttons, row, col, old_turn)
+            if self.game_controller.turn == "w":
+                self.game_controller.player2.num_discs -= 1
+            else:
+                self.game_controller.player1.num_discs -= 1
             check = False
-            if self.game_controller.player2.isComputer:
-                # time.sleep(1)
+            if self.game_controller.player2.isComputer and self.game_controller.player2.num_discs > 0:
                 check = self.game_controller.computer_turn(self.buttons)
+                if check:
+                    self.game_controller.player2.num_discs -= 1
 
             self.update_gui()
+            print(self.game_controller.player1.num_discs, self.game_controller.player2.num_discs)
             valid_moves = self.game_controller.generate_valid_move(self.buttons)
-            if len(valid_moves) == 0 and not check:
+            if (len(valid_moves) == 0 and not check) or self.game_controller.player1.num_discs == 0 or self.game_controller.player2.num_discs == 0:
                 self.end()
                 return
             elif len(valid_moves) == 0 and check:
                 valid_moves = self.game_controller.generate_valid_move(self.buttons)
-                while len(valid_moves) == 0 and check:
+                while len(valid_moves) == 0 and check and self.game_controller.player2.num_discs > 0:
                     check = self.game_controller.computer_turn(self.buttons)
                     self.update_gui()
                     valid_moves = self.game_controller.generate_valid_move(self.buttons)
@@ -65,6 +72,21 @@ class OthelloGUI:
             self.highlight_valid_moves(valid_moves)
             self.root.update()
             self.root.update_idletasks()
+        elif self.game_controller.player1.num_discs == 0:
+            self.end()
+            return
+
+    def check_discs(self):
+        count = 0
+        if self.game_controller.player2.isComputer and self.game_controller.player2.num_discs > 0:
+            count += 1
+        if not self.game_controller.player2.isComputer and self.game_controller.turn == "b" and self.game_controller.player1.num_discs > 0:
+            count += 2
+        if not self.game_controller.player2.isComputer and self.game_controller.turn == "w" and self.game_controller.player2.num_discs > 0:
+            count += 2
+        if self.game_controller.player2.isComputer and self.game_controller.player1.num_discs > 0:
+            count += 1
+        return count == 2
 
     def highlight_valid_moves(self, valid_moves):
         for i in range(8):
