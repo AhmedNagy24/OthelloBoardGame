@@ -15,8 +15,6 @@ class GameController:
 
     def update_board(self, buttons, row, col):
         old_turn = Board.update_board(buttons, row, col, self.turn)
-        if old_turn is None:
-            return
         if self.turn == "b":
             if not self.player2.isComputer:
                 self.turn = "w"
@@ -97,9 +95,7 @@ class GameController:
         board_copy = Board.generate_2d_array(buttons)
         _, computer_row, computer_col = AlphaBeta.minimax(board_copy, self.difficulty, float("-inf"), float("inf"), True)
         if computer_row == -1 and computer_col == -1:
-            print("No valid moves")
             return False
-        print(computer_row, computer_col)
         Board.update_board(buttons, computer_row, computer_col, "w")
         Board.outflank(buttons, computer_row, computer_col, "w")
         return True

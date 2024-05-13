@@ -12,11 +12,11 @@ def utility_function(board):
             if board[i][j] == 'w':
                 white_score += 1
                 min_distance = min(abs(i - corner[0]) + abs(j - corner[1]) for corner in corners)
-                white_score += 1 / (min_distance + 1)
+                white_score -= min_distance
             elif board[i][j] == 'b':
                 black_score += 1
                 min_distance = min(abs(i - corner[0]) + abs(j - corner[1]) for corner in corners)
-                black_score += 1 / (min_distance + 1)
+                black_score -= min_distance
 
     white_mobility = len(State.children_states(board, 'w'))
     black_mobility = len(State.children_states(board, 'b'))
