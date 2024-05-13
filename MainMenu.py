@@ -63,7 +63,7 @@ class MainMenu:
         self.root.destroy()
         if self.comp_var.get() == 1:
             player2 = "Computer"
-        game = OthelloGUI(player1, player2, self.diff_value.get())
+        game = OthelloGUI(player1, player2, self.comp_var.get(), self.diff_value.get())
         game.start()
 
     def quit(self):

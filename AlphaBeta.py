@@ -1,114 +1,49 @@
-def utility_function(board, depth):
-    black_score = 0
+import State
+
+
+def utility_function(board):
     white_score = 0
+    black_score = 0
+    mobility_bonus = 1
+    corner_bonus = 1
+
+    corners = [(0, 0), (0, 7), (7, 0), (7, 7)]
+
     for i in range(8):
         for j in range(8):
-            if board[i][j] == "w":
+            if board[i][j] == 'w':
                 white_score += 1
-            elif board[i][j] == "b":
+                min_distance = min(abs(i - corner[0]) + abs(j - corner[1]) for corner in corners)
+                white_score += corner_bonus / (min_distance + 1)
+            elif board[i][j] == 'b':
                 black_score += 1
-    return white_score - black_score - depth
+                min_distance = min(abs(i - corner[0]) + abs(j - corner[1]) for corner in corners)
+                black_score += corner_bonus / (min_distance + 1)
 
+    white_mobility = len(State.children_states(board, 'w'))
+    black_mobility = len(State.children_states(board, 'b'))
 
-def game_over(board):
-    empty = 0
-    for i in range(8):
-        for j in range(8):
-            if board[i][j] == "":
-                empty += 1
-    return empty == 0
+    white_score += white_mobility * mobility_bonus
+    black_score += black_mobility * mobility_bonus
 
-
-def check_adjacent(board, row, col, turn):
-    rev_turn = "w" if turn == "b" else "b"
-    for i in range(row - 1, 0, -1):
-        if board[i][col] == turn and i + 1 != row:
-            return True
-        elif board[i][col] != rev_turn:
-            break
-
-    for i in range(row + 1, 8):
-        if board[i][col] == turn and i - 1 != row:
-            return True
-        elif board[i][col] != rev_turn:
-            break
-
-    for i in range(col - 1, 0, -1):
-        if board[row][i] == turn and i + 1 != col:
-            return True
-        elif board[row][i] != rev_turn:
-            break
-
-    for i in range(col + 1, 8):
-        if board[row][i] == turn and i - 1 != col:
-            return True
-        elif board[row][i] != rev_turn:
-            break
-    return False
-
-
-def generate_children(board, turn):
-    valid_moves = []
-    for i in range(8):
-        for j in range(8):
-            if board[i][j] == "" and check_adjacent(board, i, j, turn):
-                valid_moves.append((i, j))
-    return valid_moves
-
-
-def outflank(board, row, col, turn):
-    output = board.copy()
-    for i in range(row - 1, 0, -1):
-        if output[i][col] == turn and i + 1 != row:
-            for itr_row in range(row, i, -1):
-                output[itr_row][col] = turn
-            break
-        elif output[i][col] == "":
-            break
-
-    for i in range(row + 1, 8):
-        if output[i][col] == turn and i - 1 != row:
-            for itr_row in range(row, i):
-                output[itr_row][col] = turn
-            break
-        elif output[i][col] == "":
-            break
-
-    for i in range(col - 1, 0, -1):
-        if output[row][i] == turn and i + 1 != col:
-            for itr_col in range(col, i, -1):
-                output[row][itr_col] = turn
-            break
-        elif output[row][i] == "":
-            break
-
-    for i in range(col + 1, 8):
-        if output[row][i] == turn and i - 1 != col:
-            for itr_col in range(col, i):
-                output[row][itr_col] = turn
-            break
-        elif output[row][i] == "":
-            break
-    return output
+    return white_score - black_score
 
 
 def minimax(board, depth, alpha, beta, maximizing_player):
-    if depth == 0 or game_over(board):
-        return utility_function(board, depth), -1, -1
+    if depth == 0 or State.game_over(board):
+        return utility_function(board), -1, -1
 
     if maximizing_player:
         max_eval = float("-inf")
         max_row = -1
         max_col = -1
-        children = generate_children(board, "w")
-        if len(children) == 0:
-            return utility_function(board, depth), -1, -1
+        children = State.children_states(board, "w")
         for (row, col) in children:
             new_board = board.copy()
             new_board[row][col] = "w"
-            next_state = outflank(new_board, row, col, "w")
+            next_state = State.outflank(new_board, row, col, "w")
             value, _, _ = minimax(next_state, depth - 1, alpha, beta, False)
-            if max_eval < value:
+            if max_eval <= value:
                 max_eval = value
                 max_row = row
                 max_col = col
@@ -121,15 +56,13 @@ def minimax(board, depth, alpha, beta, maximizing_player):
         min_eval = float("inf")
         min_row = -1
         min_col = -1
-        children = generate_children(board, "b")
-        if len(children) == 0:
-            return utility_function(board, depth), -1, -1
+        children = State.children_states(board, "b")
         for (row, col) in children:
             new_board = board.copy()
             new_board[row][col] = "b"
-            next_state = outflank(new_board, row, col, "w")
+            next_state = State.outflank(new_board, row, col, "w")
             value, _, _ = minimax(next_state, depth - 1, alpha, beta, True)
-            if min_eval > value:
+            if min_eval >= value:
                 min_eval = value
                 min_row = row
                 min_col = col

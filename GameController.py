@@ -1,15 +1,16 @@
 import Board
 from tkinter import messagebox
 import AlphaBeta
+from Player import Player
 
 
 class GameController:
-    def __init__(self, player1_name, player2_name, difficulty):
-        self.player1_name = player1_name
-        self.player2_name = player2_name
-        self.player1_score = 2
-        self.player2_score = 2
+    def __init__(self, player1_name, player2_name, is_comp, difficulty):
+        self.player1 = Player(player1_name, 2, "b")
+        self.player2 = Player(player2_name, 2, "w")
         self.turn = "b"
+        if is_comp == 1:
+            self.player2.isComputer = True
         self.difficulty = difficulty
 
     def update_board(self, buttons, row, col):
@@ -17,7 +18,7 @@ class GameController:
         if old_turn is None:
             return
         if self.turn == "b":
-            if self.player2_name != "Computer":
+            if not self.player2.isComputer:
                 self.turn = "w"
         else:
             self.turn = "b"
@@ -50,60 +51,47 @@ class GameController:
                 break
         return False
 
-    def generate_valid_move(self, buttons):
-        valid_moves = []
+    def get_moves(self, buttons):
+        moves = []
         for i in range(8):
             for j in range(8):
                 if buttons[i][j]["text"] == "" and self.check_adjacent(buttons, i, j, self.turn):
-                    valid_moves.append((i, j))
-        if len(valid_moves) == 0 and self.player2_name != "Computer":
+                    moves.append((i, j))
+        return moves
+
+    def generate_valid_move(self, buttons):
+        valid_moves = self.get_moves(buttons)
+        if len(valid_moves) == 0 and not self.player2.isComputer:
             if self.turn == "b":
                 self.turn = "w"
             else:
                 self.turn = "b"
-            for i in range(8):
-                for j in range(8):
-                    if buttons[i][j]["text"] == "" and self.check_adjacent(buttons, i, j, self.turn):
-                        valid_moves.append((i, j))
-        elif len(valid_moves) == 0 and self.player2_name == "Computer" and self.turn == "b":
-            board_copy = Board.generate_2d_array(buttons)
-            print(self.difficulty)
-            _, computer_row, computer_col = AlphaBeta.minimax(board_copy, self.difficulty, float("-inf"), float("inf"), True)
-            if computer_row == -1 and computer_col == -1:
-                for i in range(8):
-                    for j in range(8):
-                        if buttons[i][j]["text"] == "" and self.check_adjacent(buttons, i, j, self.turn):
-                            valid_moves.append((i, j))
-                return valid_moves
-            print(computer_row, computer_col)
-            Board.update_board(buttons, computer_row, computer_col, "w")
-            Board.outflank(buttons, computer_row, computer_col, "w")
+            valid_moves = self.get_moves(buttons)
+        elif len(valid_moves) == 0 and self.player2.isComputer and self.turn == "b":
+            check = self.computer_turn(buttons)
+            if not check:
+                return []
             valid_moves.clear()
-            for i in range(8):
-                for j in range(8):
-                    if buttons[i][j]["text"] == "" and self.check_adjacent(buttons, i, j, self.turn):
-                        valid_moves.append((i, j))
-            return valid_moves
+            valid_moves = self.get_moves(buttons)
         return valid_moves
 
     def end_game(self):
-        if self.player1_score > self.player2_score:
-            messagebox.showinfo("Game Over", self.player1_name + " won the game")
-        elif self.player1_score < self.player2_score:
-            messagebox.showinfo("Game Over", self.player2_name + " won the game")
+        if self.player1.score > self.player2.score:
+            messagebox.showinfo("Game Over", self.player1.name + " won the game")
+        elif self.player1.score < self.player2.score:
+            messagebox.showinfo("Game Over", self.player2.name + " won the game")
         else:
             messagebox.showinfo("Game Over", "Game is a draw")
 
     def count_score(self, buttons):
-        self.player1_score = 0
-        self.player2_score = 0
+        self.player1.score = 0
+        self.player2.score = 0
         for i in range(8):
             for j in range(8):
                 if buttons[i][j]["text"] == "b":
-                    self.player1_score += 1
+                    self.player1.score += 1
                 elif buttons[i][j]["text"] == "w":
-                    self.player2_score += 1
-        return self.player1_score, self.player2_score
+                    self.player2.score += 1
 
     def computer_turn(self, buttons):
         board_copy = Board.generate_2d_array(buttons)

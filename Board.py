@@ -2,12 +2,13 @@ from PIL import Image, ImageTk
 
 
 def update_board(buttons, row, col, turn):
-    image = None
-    if turn == "w":
-        image = Image.open("white.png")
-    elif turn == "b":
-        image = Image.open("black.png")
-    if image is not None:
+    try:
+        image = None
+        if turn == "w":
+            image = Image.open("white.png")
+        elif turn == "b":
+            image = Image.open("black.png")
+
         image = image.resize((55, 55))
         photo = ImageTk.PhotoImage(image)
         if turn == "w":
@@ -16,7 +17,12 @@ def update_board(buttons, row, col, turn):
             buttons[row][col].config(image=photo, width=46, height=50, text="b")
         buttons[row][col].image = photo
         return turn
-    return None
+    except FileNotFoundError:
+        if turn == "w":
+            buttons[row][col].config(text="w", background="white", activebackground="white", foreground="white")
+        else:
+            buttons[row][col].config(text="b", background="black", activebackground="black", foreground="black")
+        return turn
 
 
 def outflank(buttons, row, col, turn):
