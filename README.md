@@ -1,4 +1,4 @@
-# Othello Game with Alpha-Beta Pruning and Tkinter GUI
+# Othello Board Game
 
 Welcome to the Othello Game repository! This project is a Python implementation of the classic board game Othello, featuring an intelligent AI opponent powered by the alpha-beta pruning algorithm. The game includes a graphical user interface (GUI) built using Tkinter, providing an engaging and interactive experience.
 
@@ -9,7 +9,6 @@ Welcome to the Othello Game repository! This project is a Python implementation 
 - **User-Friendly GUI**: Enjoy a visually appealing and easy-to-use interface built with Tkinter.
 - **Move Validation**: Ensures all moves are legal according to Othello rules.
 - **Score Tracking**: Real-time display of scores for both players.
-- **Undo Feature**: Allows players to undo their last move and try a different strategy.
 
 ## Getting Started
 
